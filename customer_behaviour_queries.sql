@@ -80,6 +80,43 @@ SELECT
 FROM customer_type
 GROUP BY customer_segment;
 
+--Top 3 most purchased products in each category
+WITH item_counts AS (
+    SELECT
+        category,
+        item_purchased,
+        COUNT(customer_id) AS total_orders,
+        ROW_NUMBER() OVER (
+            PARTITION BY category
+            ORDER BY COUNT(customer_id) DESC
+        ) AS item_rank
+    FROM customer
+    GROUP BY category, item_purchased
+)
+SELECT
+    category,
+    item_purchased,
+    total_orders
+FROM item_counts
+WHERE item_rank <= 3;
+
+--Are repeat buyers likely to subscribe?
+SELECT
+    subscription_status,
+    COUNT(customer_id) AS repeat_buyers
+FROM customer
+WHERE previous_purchases > 5
+GROUP BY subscription_status;
+
+
+--Revenue by age group
+SELECT
+    age_group,
+    SUM(purchase_amount) AS total_revenue
+FROM customer
+GROUP BY age_group
+ORDER BY total_revenue DESC;
+
 
 
 
